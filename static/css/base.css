@@ -1,0 +1,9 @@
+/* 常见长宽比：16比9 */
+#kof {
+    width: 1280px;
+    height: 720px;
+
+    background-image: url('/static/images/background/background.gif');
+    background-size: 200% 100%;
+    background-position: top;
+}
