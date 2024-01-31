@@ -6,4 +6,83 @@
     background-image: url('/static/images/background/background.gif');
     background-size: 200% 100%;
     background-position: top;
+
+    position: absolute;
+    /*将#kof作为可以被索引的父元素，便于后续元素索引*/
+}
+
+#kof>.kof-head {
+    position: absolute;
+    /*紧贴父元素（#kof）顶部*/
+    top: 0;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    /*弹性布局*/
+    align-items: center;
+    user-select: none;
+    /*用户无法选中此处*/
+}
+
+#kof>.kof-head>.kof-head-hp0 {
+    height: 40px;
+    width: calc(50% - 40px - 20px);
+    /*即屏幕的一半减去计时器的一半，再预留出一点空隙*/
+    margin-left: 20px;
+    /*基于上面的空隙作为边距，使得整体能够居中*/
+    border: white 5px solid;
+    border-right: none;
+    /*防止和计时器边框叠加*/
+    box-sizing: border-box;
+}
+
+#kof>.kof-head>.kof-head-timer {
+    width: 80px;
+    height: 60px;
+    /* 4:3的方块 */
+    background-color: orange;
+    border: white 5px solid;
+    box-sizing: border-box;
+    color: white;
+    font-size: 30px;
+    font-weight: 800;
+    text-align: center;
+    line-height: 50px;
+    /*竖直居中：行高是字的一半，并且注意这里是边框盒子模型，我们需要减去上下边框各5px*/
+}
+
+#kof>.kof-head>.kof-head-hp1 {
+    height: 40px;
+    width: calc(50% - 40px - 20px);
+    border: white 5px solid;
+    border-left: none;
+    box-sizing: border-box;
+}
+
+#kof>.kof-head>.kof-head-hp0>div {
+    width: 100%;
+    height: 100%;
+    background-color: red;
+    /*外面的div红色，里面绿色，显示的才是绿色*/
+    float: right;
+    /*拳皇掉血是两端往中间掉*/
+}
+
+#kof>.kof-head>.kof-head-hp1>div {
+    width: 100%;
+    height: 100%;
+    background-color: red;
+}
+
+#kof>.kof-head>.kof-head-hp0>div>div {
+    width: 100%;
+    height: 100%;
+    background-color: lightgreen;
+    float: right;
+}
+
+#kof>.kof-head>.kof-head-hp1>div>div {
+    width: 100%;
+    height: 100%;
+    background-color: lightgreen;
 }

@@ -15,7 +15,22 @@
 <body>
     <!-- 建立基底元素，项目写在这里面 -->
     <!-- id用于索引div -->
-    <div id="kof"></div>
+    <div id="kof">
+        <!-- 用div实现血条和计时器，不用canvas是因为它每秒会渲染60次，这种基本不变的资源不需要高刷 -->
+        <div class="kof-head">
+            <div class="kof-head-hp0">
+                <div>
+                    <div></div><!--再中间的div用于拖影效果-->
+                </div><!--中间的div实现血条减少的效果-->
+            </div>
+            <div class="kof-head-timer">60</div>
+            <div class="kof-head-hp1">
+                <div>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script type="module">
         import { KOF } from "/static/js/base.js";

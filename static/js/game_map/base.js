@@ -16,6 +16,9 @@ class GameMap extends GameObject {  //由基类继承
         this.$canvas.focus();
 
         this.controller = new Controller(this.$canvas);
+
+        this.$timer = this.root.$kof.find(".kof-head>.kof-head-timer");
+        this.time_left = 60000  // ms
     }
 
     start() {
@@ -23,6 +26,27 @@ class GameMap extends GameObject {  //由基类继承
     }
 
     update() {
+        this.time_left -= this.timedelta;
+        if (this.time_left <= 0) this.time_left = 0;
+        this.$timer.text(parseInt(this.time_left / 1000));
+
+        //平局机制
+        if (this.time_left === 0) {
+            let [a, b] = this.root.players;
+            if (a.status !== 6 && b.status !== 6) {
+                a.status = b.status = 6;
+                a.frame_current_cnt = b.frame_current_cnt = 0;
+                a.vx = b.vx = 0;
+            }
+        }
+
+        if (this.time_left > 0) {
+            let [a, b] = this.root.players;
+            if (a.status === 6 && b.status !== 6 || a.status !== 6 && b.status === 6) {
+                this.time_left = 0;
+            }
+        }
+
         this.render();  //避免屎山，封装代码
     }
     //每一帧都要清空地图，否则看到的就不是物体在运动，而是带着轨迹在拉长

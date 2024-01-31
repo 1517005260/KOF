@@ -36,6 +36,10 @@ class Player extends GameObject {
         this.animations = new Map();
         //当前记录了多少帧
         this.frame_current_cnt = 0;
+
+        this.hp = 100;  //血条
+        this.$hp_outer = this.root.$kof.find(`.kof-head-hp${this.id}>div`);//取出血条便于控制 
+        this.$hp_inner = this.$hp_outer.find('div');
     }
 
     start() {
@@ -43,8 +47,7 @@ class Player extends GameObject {
     }
 
     update_move() {
-        if (this.status === 3)  //只有在空中时再计算重力
-            this.vy += this.g; //v=v0+gt
+        this.vy += this.g; //施加重力场
 
         this.x += this.vx * this.timedelta / 1000;
         //timedelta是继承自GameObject的自定义变量。时间单位是毫秒，要除1000统一到秒
@@ -83,7 +86,7 @@ class Player extends GameObject {
             if (space) {  //攻击状态
                 this.status = 4;  //这会修改默认状态，在render中有特判
                 this.vx = 0;
-                this.frame_current_cnt = 0; //攻击时从第0帧开始渲染
+                this.frame_current_cnt = 0; //攻击时从第0帧开始渲染，完整播放整个动画并结束
             }
             else if (w) {   //垂直跳、向前45度跳、向后45度跳
                 if (d) {
@@ -111,6 +114,8 @@ class Player extends GameObject {
     }
 
     update_direction() {  //更新朝向
+        if (this.status === 6) return;  //防止死亡后还会转向
+
         let players = this.root.players;
         if (players[0] && players[1]) {     //如果两名玩家都存在
             let me = this;
@@ -122,10 +127,87 @@ class Player extends GameObject {
         }
     }
 
+    is_attacked() {
+        if (this.status === 6) return;  //防止死亡后受击
+
+        this.status = 5;//这也会改变默认状态，在render中要特判回归默认状态
+        this.frame_current_cnt = 0;
+
+        this.hp = Math.max(this.hp - 20, 0);
+
+        // this.$hp.width(this.$hp.parent().width() * this.hp / 100);
+        //用动画效果实现
+        //拖影效果：绿色先变，红色后变
+        this.$hp_inner.animate({
+            width: this.$hp_outer.parent().width() * this.hp / 100
+        }, 300); //300ms渐变
+        this.$hp_outer.animate({
+            width: this.$hp_outer.parent().width() * this.hp / 100
+        }, 600);
+
+        if (this.hp <= 0) {
+            this.status = 6;
+            this.frame_current_cnt = 0;
+            this.vx = 0;//防止死时受击滑动
+        }
+    }
+
+    is_collision(r1, r2) {  //碰撞检测
+        //原理：两个矩形有交集，就是在两个一维的线段层次上，两者有交集
+        /*ex:
+            线段1== a------b
+            线段2==     c-------d
+            有交集== max(a,c)<=min(b,d)    
+        */
+        //分水平和竖直两个层次：
+        if (Math.max(r1.x1, r2.x1) > Math.min(r1.x2, r2.x2))
+            return false;
+        if (Math.max(r1.y1, r2.y1) > Math.min(r1.y2, r2.y2))
+            return false;
+        return true;
+    }
+
+    update_attack() {  //更新判定攻击的抽象几何块
+        if (this.status === 4 && this.frame_current_cnt === 18) {   //18帧是实验值，基本上攻击动作在16-20帧进行，我们取中间判定
+            let me = this;
+            let you = this.root.players[1 - this.id];
+
+            let r1;     //手臂区域,用坐标表示
+            if (this.direction > 0) {
+                r1 = {
+                    x1: me.x + 120,
+                    y1: me.y + 40,
+                    x2: me.x + 120 + 100,
+                    y2: me.y + 40 + 20
+                };
+            } else {
+                r1 = {
+                    x1: me.x + me.width - 120 - 100,
+                    y1: me.y + 40,
+                    x2: me.x + me.width - 120,
+                    y2: me.y + 40 + 20
+                };
+            }
+
+            let r2 = {  //对方区域
+                x1: you.x,
+                x2: you.x + you.width,
+                y1: you.y,
+                y2: you.y + you.height
+            };
+
+            if (this.is_collision(r1, r2))  //成功碰撞，对方受击
+            {
+                you.is_attacked();
+            }
+        }
+    }
+
     update() {
         this.update_control();
         this.update_move();
         this.update_direction();
+        this.update_attack();
 
         this.render();//渲染一定要等所有动作做完了再渲染
     }
@@ -136,6 +218,19 @@ class Player extends GameObject {
         //渲染成矩形，参数通过root索引
         // this.ctx.fillStyle = this.color;
         // this.ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        // //实现攻击：碰撞检测  -> 使用矩形代替人物，手臂
+        // this.ctx.fillStyle = "blue";  // 人
+        // this.ctx.fillRect(this.x, this.y, this.width, this.height);
+        // if (this.direction > 0) {     //手臂
+        //     this.ctx.fillStyle = "red";
+        //     this.ctx.fillRect(this.x + 120, this.y + 40, 100, 20);   //实验值
+        // } else {
+        //     this.ctx.fillStyle = "red";
+        //     this.ctx.fillRect(this.x + this.width - 120 - 100, this.y + 40, 100, 20);   //对称方法同人物反转
+        //     //即：先把左上角+width转移到右上角，再渲染
+        // }
+
 
         //用gif渲染
         let status = this.status;
@@ -171,13 +266,18 @@ class Player extends GameObject {
                 this.ctx.restore();  //恢复配置,把反转的坐标系再翻回来
             }
 
-            this.frame_current_cnt++;   //显示完这一帧后帧数++
-
             //特判攻击状态
-            if (status === 4 && this.frame_current_cnt === obj.frame_rate * (obj.frame_cnt - 1)) {
-                this.status = 0;//攻击状态播放完后回到默认状态
+            if (status === 4 || this.status === 5 || this.status === 6) {
+                if (this.frame_current_cnt === obj.frame_rate * (obj.frame_cnt - 1)) //写一起太长了，分开写
+                    if (this.status !== 6)
+                        this.status = 0;//回到默认状态
+                    else {
+                        //角色死亡后应该一直倒地不起
+                        this.frame_current_cnt--;//回到倒数第二帧，后面再++，即停在最后一帧
+                    }
             }
         }
+        this.frame_current_cnt++;   //显示完这一帧后帧数++，准备渲染下一帧
     }
 }
 

@@ -15,14 +15,14 @@ class Kyo extends Player {
     //初始化动画数组
     init_animations() {
         let outer = this;  //只要涉及到函数调用this就一定先要保存当前实例
-        let offsets = [0, -22, -22, -180, 0, 0, 0];    //只有走动时需要加y轴偏移量且向上  -22是多次实验值
+        let offsets = [0, -22, -22, -140, 0, 0, 0];    //只有走动时需要加y轴偏移量且向上  -22是多次实验值
         for (let i = 0; i < 7; i++) {  //对应状态机
             let gif = GIF();
             gif.load(`/static/images/player/kyo/${i}.gif`);
             this.animations.set(i, {
                 gif: gif,
                 frame_cnt: 0,  //总帧数
-                frame_rate: 10,  //帧率，即每x帧后渲染下一次    这个值每个电脑、每个浏览器的适应值不一样
+                frame_rate: 5,  //帧率，即每x帧后渲染下一次    这个值每个电脑、每个浏览器的适应值不一样
                 offset_y: offsets[i],  //y轴偏移量
                 loaded: false,  //是否加载完成
                 scale: 2,    //缩放倍数
@@ -34,7 +34,7 @@ class Kyo extends Player {
                 obj.loaded = true;
 
                 if (i === 3) {
-                    obj.frame_rate = 5;
+                    obj.frame_rate = 4;
                 }
             }
         }
