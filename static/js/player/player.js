@@ -87,6 +87,9 @@ class Player extends GameObject {
                 this.status = 4;  //这会修改默认状态，在render中有特判
                 this.vx = 0;
                 this.frame_current_cnt = 0; //攻击时从第0帧开始渲染，完整播放整个动画并结束
+                //在不同的游戏状态（如站立、行走、跳跃、攻击等）下，角色可能会播放不同的动画序列。
+                //每个动画序列都有其特定的帧数和播放速率。
+                //当角色的状态改变时，为了准确地从新动画序列的第一帧开始播放，需要重置帧计数器。
             }
             else if (w) {   //垂直跳、向前45度跳、向后45度跳
                 if (d) {
@@ -140,7 +143,7 @@ class Player extends GameObject {
         //拖影效果：绿色先变，红色后变
         this.$hp_inner.animate({
             width: this.$hp_outer.parent().width() * this.hp / 100
-        }, 300); //300ms渐变
+        }, 300); //300ms渐变     用outer才能定位到血条框的长度
         this.$hp_outer.animate({
             width: this.$hp_outer.parent().width() * this.hp / 100
         }, 600);
@@ -257,7 +260,10 @@ class Player extends GameObject {
                 this.ctx.translate(-this.root.game_map.$canvas.width(), 0); //向右边（负方向）平移
 
                 let k = parseInt(this.frame_current_cnt / obj.frame_rate) % obj.frame_cnt;
-                let image = obj.gif.frames[k].image;
+                //  [已渲染数 / 帧率] % 总帧数
+                //这行代码计算当前应该渲染的帧。它将 frame_current_cnt 除以 frame_rate，然后对 frame_cnt 取模，确保结果在0到frame_cnt - 1之间，从而实现循环播放
+                let image = obj.gif.frames[k].image;  //获取当前帧，帧在gif包里是个数组
+
                 //渲染的时候，由于反转+平移了坐标系，现在是由右上角向左下角的渲染
                 //因此，我们需要水平反转渲染
                 //此外还要注意，由于现在是右上角开始渲染，我们如果用减法反转到中轴线对面的左上角，还需要加上偏移量（人物宽度）

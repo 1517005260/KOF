@@ -35,6 +35,7 @@ class GameObject {
 let last_timestamp = 0; //上一帧的发生时间
 
 let GAME_OBJECTS_FRAME = function (now_timestamp) {  //传入这一帧发生的时间
+    //在第一次调用 GAME_OBJECTS_FRAME 时，now_timestamp 就是浏览器决定执行动画的那一刻的时间戳。
     for (let obj of GAME_OBJECTS)   //遍历value
     {
         if (obj.has_call_start === false) {

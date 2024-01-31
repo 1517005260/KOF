@@ -11,9 +11,9 @@ class GameMap extends GameObject {  //由基类继承
         //定义canvas
         this.$canvas = $('<canvas width="1280" height="720" tabindex=0 ></canvas>');  //tabindex用于canvas可聚焦（可以接收键盘的信号）
         //取出canvas，索引[0]可供访问<canvas>元素本身，getcontext可供初始化2d作图
-        this.ctx = this.$canvas[0].getContext("2d");  //最后结果保存在ctx中
-        this.root.$kof.append(this.$canvas);  //将创建的 canvas 元素添加到 root 对象的 $kof 属性中
-        this.$canvas.focus();
+        this.ctx = this.$canvas[0].getContext("2d");  //我们通过ctx可以访问到各种canvas的api
+        this.root.$kof.append(this.$canvas);  //将创建的 canvas 元素添加到 root 对象的 $kof 元素中
+        this.$canvas.focus();//将焦点设置到canvas元素上，方便键盘控制
 
         this.controller = new Controller(this.$canvas);
 
